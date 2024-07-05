@@ -77,7 +77,7 @@ function Login({setUser}) {
                     <button  disabled={loading}>sign-in</button>
 
                 </form>
-                    <button >sign-in with google</button>
+                    {/* <button >sign-in with google</button> */}
             </div>
             <div className="devider"></div>
             <div className="item">
