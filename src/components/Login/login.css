@@ -61,6 +61,22 @@
                 
         }
     }
+    button{
+        width: 65%;
+        padding: 15px;
+        background-color: rgba(38, 141, 243, 0.394);
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        &:hover{
+        background-color: rgba(38, 140, 243, 0.766);
+        }
+        &:disabled{
+            cursor: not-allowed;
+        }
+        
+}
 
 }
 .devider{

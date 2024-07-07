@@ -27,8 +27,9 @@ const App = () => {
   return (
     <div className='container'>
       {CurrentUser ? (<>
-        <List />
-        {chatId&&<Chat setDetails={setDetails} />}
+        
+        <List/>
+        {chatId&&<Chat setDetails={setDetails} details={details} />}
         {
           details ? (<Details setDetails={setDetails} />) : (<></>)
         }

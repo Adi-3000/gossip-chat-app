@@ -11,6 +11,7 @@ function Login({setUser}) {
         url: ""
     })
     const[loading,setLoading]=useState(false)
+    const[registerform,setRegisterform]=useState(false)
     const handleAvatar = e => {
         if (e.target.files[0]) {
 
@@ -21,6 +22,8 @@ function Login({setUser}) {
             })
         }
     }
+    const mql = window.matchMedia('(max-width: 600px)');
+    let mobileView = mql.matches;
     const handleLogin = async(e) => {
         e.preventDefault()
         setLoading(true)
@@ -69,18 +72,19 @@ function Login({setUser}) {
     }
     return (
         <div className='login'>
-            <div className="item">
+            <div className="item" style={mobileView?{display:!registerform?"flex":"none"}:{}}>
                 <h2>Welcome back</h2>
                 <form onSubmit={handleLogin} >
                     <input type="text" placeholder='email' name='email' />
                     <input type="password" placeholder='password' name='password' />
                     <button  disabled={loading}>sign-in</button>
-
                 </form>
+                <button  disabled={loading} onClick={()=>{setRegisterform(!registerform)}}>Register</button>
+                
                     {/* <button >sign-in with google</button> */}
             </div>
-            <div className="devider"></div>
-            <div className="item">
+            <div className="devider" style={mobileView?{display:"none"}:{}}></div>
+            <div className="item"style={mobileView?{display:registerform?"flex":"none"}:{}}>
             <h2>create an account</h2>
                     <form onSubmit={handleSignup}>
                         <label htmlFor="file">
@@ -92,6 +96,8 @@ function Login({setUser}) {
                         <button disabled={loading}>{loading?"Registrering user":"sign-up"}</button>
 
                     </form>
+                <button  disabled={loading} onClick={()=>{setRegisterform(!registerform)}}>Login</button>
+
             </div>
         </div>
     )

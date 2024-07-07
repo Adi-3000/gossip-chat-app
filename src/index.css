@@ -23,9 +23,17 @@ body{
   height: 90vh;
   background-color: rgb(0 0 0 / 66%);
   -webkit-backdrop-filter: blur(10px) saturate(180%);
-  backdrop-filter: blur(15px) saturate(180%);
+  backdrop-filter: blur(10px) saturate(180%);
   border-radius: 12px;
   display: flex;
 
-
+}
+@media only screen and (max-width: 520px){
+  .container{
+  width: 95vw;
+  height: 95vh;
+  border-radius: 15px;
+  -webkit-backdrop-filter: blur(08px) saturate(180%);
+  backdrop-filter: blur(08px) saturate(180%);
+  }
 }

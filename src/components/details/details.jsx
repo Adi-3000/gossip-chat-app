@@ -28,7 +28,7 @@ function Details({setDetails}) {
     return (
         <div className='details'>
             <div className="close">
-                <img src="./plus.png" alt="" onClick={()=>setDetails(false)}/>
+                <img src="./back.png" alt="" onClick={()=>setDetails(false)}/>
             </div>
             <div className="user">
                 <img src={user?.avatar||"./avatar.png"} alt="" />
