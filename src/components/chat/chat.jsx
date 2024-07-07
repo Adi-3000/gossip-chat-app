@@ -8,12 +8,12 @@ import { useChatStore } from '../../lib/chatstore.js';
 import { useUserStore } from '../../lib/Userstore.js';
 import upload from '../../lib/upload.js';
 
-function Chat({ setDetails,details}) {
+function Chat({ setDetails, details }) {
     const [eopen, seteopen] = useState(false);
     const [text, settext] = useState('');
     const [chat, setChat] = useState();
     const endRef = useRef(null)
-    const { chatId, user, isCurrentBlocked, isReceiverBlocked,backchat } = useChatStore();
+    const { chatId, user, isCurrentBlocked, isReceiverBlocked, backchat } = useChatStore();
     const { CurrentUser } = useUserStore();
     const [image, setImage] = useState({
         file: null,
@@ -94,13 +94,40 @@ function Chat({ setDetails,details}) {
             })
         }
     }
+    function parsetime(seconds,nanoseconds) {
+        const milliseconds = seconds * 1000;
+        const date = new Date(milliseconds);
+        // Add nanoseconds (converted to milliseconds)
+        date.setMilliseconds(date.getMilliseconds() + nanoseconds / 1000000);
+        let livedate=new Date(Date.now()-date)
+      
+
+
+        // Format the date and time
+        // const readableDate = date.toISOString().replace('T', ' ').replace('Z', '');
+        const readablehour = date.getHours();
+        const readablemin = date.getMinutes();
+        console.log(date.getDate()+":"+readablehour+":"+readablemin)
+        console.log("difference"+livedate.getDate()+":"+livedate.getUTCHours()+":"+livedate.getUTCMinutes())
+        if(livedate.getDate()>1){
+            return `${date.getDate()}/${date.getMonth()+1}-${readablehour}:${readablemin}`
+        }
+        else{
+            if(livedate.getUTCHours()>0)
+             return `${livedate.getUTCHours()}:${livedate.getUTCMinutes()} hours ago`
+            else
+            return `${livedate.getUTCMinutes()} min ago`
+
+        }
+    } 
+
     const mql = window.matchMedia('(max-width: 600px)');
-  let mobileView = mql.matches;
+    let mobileView = mql.matches;
     return (
-        <div className='chat' style={mobileView?{display:!details?"flex":"none"}:{}} >
+        <div className='chat' style={mobileView ? { display: !details ? "flex" : "none" } : {}} >
             <div className="top">
                 <div className="user">
-                <img className="close" src="./back.png" alt="" onClick={() => backchat()} />
+                    <img className="close" src="./back.png" alt="" onClick={() => backchat()} />
                     <img src={user?.avatar || "./avatar.png"} alt="" onClick={() => setDetails(prev => !prev)} />
                     <div className="texts">
                         <span>{user?.username || "user illa"}</span>
@@ -120,7 +147,7 @@ function Chat({ setDetails,details}) {
 
                             <p>{message.text}</p>
                             <span>
-                                1min ago
+                                {parsetime(message.createdAt.seconds,message.createdAt.nanoseconds)}
                             </span>
                         </div>
                     </div>
@@ -130,7 +157,7 @@ function Chat({ setDetails,details}) {
                         <img src={image.url} alt="" />
                     </div>
                 </div>}
-                <div ref={endRef} style={{height:"1px"}}></div>
+                <div ref={endRef} style={{ height: "1px" }}></div>
             </div>
             <div className="bottom">
                 {isCurrentBlocked || isReceiverBlocked ? isCurrentBlocked ? <div className='blocked'>Sorry, the user is fed-up with you , you can not reply to this message anymore</div> : <div className='blocked'>you have blocked this user</div>
@@ -150,7 +177,7 @@ function Chat({ setDetails,details}) {
                             <img src="./emoji.png" alt="" onClick={() => seteopen(!eopen)} />
                             <div className="picker">
 
-                                <EmojiPicker open={eopen} onEmojiClick={handleEmoji}  theme='auto'height={350} lazyLoadEmojis={true} autoFocusSearch={false}	/>
+                                <EmojiPicker open={eopen} onEmojiClick={handleEmoji} theme='auto' height={350} lazyLoadEmojis={true} autoFocusSearch={false} />
                             </div>
 
                         </div>

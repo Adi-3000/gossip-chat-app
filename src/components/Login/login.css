@@ -44,6 +44,13 @@
                     opacity: 0.6;
                 }
             }
+            .error{
+                font-size: 13px;
+                color: red;
+                width: 80%;
+                text-align: center;
+                margin: -10px;
+            }
             button{
                 width: 100%;
                 padding: 15px;
