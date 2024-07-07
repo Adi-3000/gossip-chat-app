@@ -31,7 +31,7 @@ body{
 @media only screen and (max-width: 520px){
   .container{
   width: 95vw;
-  height: 95vh;
+  height: 99vh;
   border-radius: 15px;
   -webkit-backdrop-filter: blur(08px) saturate(180%);
   backdrop-filter: blur(08px) saturate(180%);

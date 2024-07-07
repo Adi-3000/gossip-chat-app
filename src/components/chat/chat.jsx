@@ -130,7 +130,7 @@ function Chat({ setDetails,details}) {
                         <img src={image.url} alt="" />
                     </div>
                 </div>}
-                <div ref={endRef}></div>
+                <div ref={endRef} style={{height:"1px"}}></div>
             </div>
             <div className="bottom">
                 {isCurrentBlocked || isReceiverBlocked ? isCurrentBlocked ? <div className='blocked'>Sorry, the user is fed-up with you , you can not reply to this message anymore</div> : <div className='blocked'>you have blocked this user</div>
@@ -150,7 +150,7 @@ function Chat({ setDetails,details}) {
                             <img src="./emoji.png" alt="" onClick={() => seteopen(!eopen)} />
                             <div className="picker">
 
-                                <EmojiPicker open={eopen} onEmojiClick={handleEmoji}  theme='auto'height={350} lazyLoadEmojis={true}/>
+                                <EmojiPicker open={eopen} onEmojiClick={handleEmoji}  theme='auto'height={350} lazyLoadEmojis={true} autoFocusSearch={false}	/>
                             </div>
 
                         </div>
