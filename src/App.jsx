@@ -9,34 +9,40 @@ import { useUserStore } from "./lib/Userstore"
 import { useChatStore } from "./lib/chatstore"
 
 const App = () => {
-  const[user,setUser]=useState(false)
+  const [user, setUser] = useState(false)
   const [details, setDetails] = useState(false)
-  const{CurrentUser,isLoading,fetchUser}=useUserStore()
-  const { chatId} = useChatStore();
+  const [profile, setProfile] = useState(false)
+  const { CurrentUser, isLoading, fetchUser } = useUserStore()
+  const { chatId } = useChatStore();
 
-  useEffect(()=>{
-    const unSub=onAuthStateChanged(auth,(user)=>{
+  useEffect(() => {
+    const unSub = onAuthStateChanged(auth, (user) => {
       fetchUser(user?.uid)
     });
-    return ()=>{
+    return () => {
       unSub();
     }
-  },[fetchUser]);
+  }, [fetchUser]);
   console.log(CurrentUser)
-  if(isLoading) return <div>Loading...</div>
+  console.log("pro")
+  console.log(profile)
+
+  if (isLoading) return <div>Loading...</div>
   return (
     <div className='container'>
+      
       {CurrentUser ? (<>
-        
-        <List/>
-        {chatId&&<Chat setDetails={setDetails} details={details} />}
+
+        <List  setProfile={setProfile}/>
+      {(profile)&&<Details setDetails={setDetails} profile={profile}/>}
+        {chatId && <Chat setDetails={setDetails} details={details}/>}
         {
-          details ? (<Details setDetails={setDetails} />) : (<></>)
+           details ? (<Details setDetails={setDetails} profile={false}/>) : (<></>)
         }
-  
-      </>) : (<Login setUser={setUser}/>)}
-      </div>
-    
+
+      </>) : (<Login setUser={setUser} />)}
+    </div>
+
   )
 }
 

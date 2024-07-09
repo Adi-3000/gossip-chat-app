@@ -6,11 +6,13 @@ import { doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { useChatStore } from '../../../lib/chatstore';
 
-function Chatlist() {
+function Chatlist({hidchat}) {
     const [adduser, setadduser] = useState(false);
     const [chats, setChats] = useState([]);
     const { CurrentUser } = useUserStore();
     const { changeChat } = useChatStore();
+    const[hid,sethid]=useState(false)
+
     useEffect(() => {
         const unsub = onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
             const items = res.data().chats;
@@ -53,21 +55,22 @@ function Chatlist() {
 
     return (
         <div className='chatList'>
-            <div className="search">
+            {!hidchat&&<div className="search">
                 <div className="searchBar">
                     <img src="./search.png" alt="" />
                     <input type="text" placeholder='search' />
                 </div>
                 <img src={adduser ? "./minus.png" : "./plus.png"} alt="" className='add' onClick={() => setadduser(!adduser)} />
-            </div>
+            </div>}
+            {hidchat&&<div className="devider"></div>}
 
             {chats.map((chat) => (
-                <div className="item" key={chat.chatId} onClick={() => handleSelect(chat)} style={{ background: chat?.isSeen ? "transparent" : "rgb(20 80 125 / 44%)" }}>
+                <div className={hidchat?"item hid":"item"} key={chat.chatId} onClick={() => handleSelect(chat)} style={{ background: chat?.isSeen ? "transparent" : "rgb(20 80 125 / 44%)", }}>
                     <img src={chat.user.blocked.includes(CurrentUser.id)?"./avatar.png":chat.user.avatar || "./avatar.png"} alt="" />
-                    <div className="text">
+                    {!hidchat&&<div className="text">
                         <span>{chat.user.blocked.includes(CurrentUser.id)?"user":chat.user.username}</span>
                         <p>{chat.lastMessage}</p>
-                    </div>
+                    </div>}
                 </div>
             ))}
             {adduser ? <Adduser /> : <></>}

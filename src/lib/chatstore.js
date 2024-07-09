@@ -9,6 +9,7 @@ export const useChatStore = create((set) => ({
     isCurrentBlocked: false,
     isReceiverBlocked: false,
     isLoading: true,
+    chats:null,
     changeChat: (chatId, user) => {
         const CurrentUser = useUserStore.getState().CurrentUser;
         console.log("store chatid", chatId)
@@ -54,5 +55,11 @@ export const useChatStore = create((set) => ({
             isReceiverBlocked: false,
             isLoading: true,
         })
+    },
+    setchats:(chat)=>{
+        set({
+            chats:chat
+        })
+        
     }
 }))

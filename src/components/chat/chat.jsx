@@ -13,7 +13,7 @@ function Chat({ setDetails, details }) {
     const [text, settext] = useState('');
     const [chat, setChat] = useState();
     const endRef = useRef(null)
-    const { chatId, user, isCurrentBlocked, isReceiverBlocked, backchat } = useChatStore();
+    const { chatId, user, isCurrentBlocked, isReceiverBlocked, backchat,setchats } = useChatStore();
     const { CurrentUser } = useUserStore();
     const [image, setImage] = useState({
         file: null,
@@ -26,8 +26,13 @@ function Chat({ setDetails, details }) {
         endRef.current?.scrollIntoView({ behavior: "smooth" });
     })
     useEffect(() => {
-        const unSub = onSnapshot(doc(db, "Chats", chatId), (res) => {
-            setChat(res.data())
+        
+        const unSub = onSnapshot(doc(db, "Chats", chatId), async(res) => {
+            await setChat(res.data())
+                setchats(res.data())
+            
+
+
         })
         return () => {
             unSub()
@@ -127,7 +132,7 @@ function Chat({ setDetails, details }) {
         <div className='chat' style={mobileView ? { display: !details ? "flex" : "none" } : {}} >
             <div className="top">
                 <div className="user">
-                    <img className="close" src="./back.png" alt="" onClick={() => backchat()} />
+                    <img className="close" src="./back.png" alt="" onClick={() => {setDetails(false);backchat()}} />
                     <img src={user?.avatar || "./avatar.png"} alt="" onClick={() => setDetails(prev => !prev)} />
                     <div className="texts">
                         <span>{user?.username || "user illa"}</span>
@@ -143,6 +148,7 @@ function Chat({ setDetails, details }) {
                 {chat?.message?.map((message) => (
                     <div className={message.senderId == CurrentUser.id ? "message own" : "message"} key={message?.createdAt}>
                         <div className="text">
+                            
                             {message.img && <img src={message.img} alt="" />}
 
                             <p>{message.text}</p>
