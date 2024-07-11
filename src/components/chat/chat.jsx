@@ -81,7 +81,7 @@ function Chat({ setDetails, details }) {
                     senderId: CurrentUser.id,
                     text,
                     createdAt: new Date(),
-                    ...(imgurl && { img: imgurl }),
+                    ...(imgurl.length!=0 && { img: imgurl }),
 
                 })
             });
@@ -245,10 +245,8 @@ function Chat({ setDetails, details }) {
                 {chat?.message?.map((message) => (
                     <div className={message.senderId == CurrentUser.id ? "message own" : "message"} key={message?.createdAt}>
                         <div className="text">
-
                             {message.img && message.img.map((img, index) => (
-
-                                <img src={img.product} alt="" key={index} />
+                                <img src={img.product} alt="" key={index} loading='lazy' />
                             ))
                             }
 
