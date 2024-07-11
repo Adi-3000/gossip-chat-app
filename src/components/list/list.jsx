@@ -4,7 +4,7 @@ import Userinfo from './userinfo/userinfo'
 import Chatlist from './chatlist/chatlist'
 import { useChatStore } from '../../lib/chatstore';
 
-function List({setProfile}) {
+function List({setProfile,profile}) {
   const { chatId} = useChatStore();
   const mql = window.matchMedia('(max-width: 600px)');
   let mobileView = mql.matches;
@@ -16,7 +16,7 @@ function List({setProfile}) {
   return (
 
     
-    <div className='list'style={mobileView?{display:!chatId?"block":"none"}:!chatId?{}:hidchat?{maxWidth:"7%",overflow:"hidden"}:{}}>
+    <div className='list'style={mobileView?{display:!chatId&!profile?"block":"none"}:!chatId?{}:hidchat?{maxWidth:"7%",overflow:"hidden"}:{}}>
         <Userinfo setHidchat={setHidchat} hidchat={hidchat}  setProfile={setProfile}/>
         <Chatlist hidchat={hidchat}/>
     

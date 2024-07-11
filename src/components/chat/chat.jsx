@@ -13,7 +13,7 @@ function Chat({ setDetails, details }) {
     const [text, settext] = useState('');
     const [chat, setChat] = useState();
     const endRef = useRef(null)
-    const { chatId, user, isCurrentBlocked, isReceiverBlocked, backchat,setchats } = useChatStore();
+    const { chatId, user, isCurrentBlocked, isReceiverBlocked, backchat, setchats } = useChatStore();
     const { CurrentUser } = useUserStore();
     const [image, setImage] = useState({
         file: null,
@@ -23,15 +23,13 @@ function Chat({ setDetails, details }) {
 
 
     useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth" });
+        endRef.current?.scrollIntoView({ behavior: "smooth" , block: "end"});
     })
     useEffect(() => {
-        
-        const unSub = onSnapshot(doc(db, "Chats", chatId), async(res) => {
-            await setChat(res.data())
-                setchats(res.data())
-            
 
+        const unSub = onSnapshot(doc(db, "Chats", chatId), async (res) => {
+            await setChat(res.data())
+            setchats(res.data())
 
         })
         return () => {
@@ -47,7 +45,7 @@ function Chat({ setDetails, details }) {
         seteopen(false)
     }
     const handleSend = async () => {
-        if (text === "") return;
+        if (text === ""&!image.file) return;
         let imgurl = null;
         try {
             if (image.file) {
@@ -99,32 +97,32 @@ function Chat({ setDetails, details }) {
             })
         }
     }
-    function parsetime(seconds,nanoseconds) {
+    function parsetime(seconds, nanoseconds) {
         const milliseconds = seconds * 1000;
         const date = new Date(milliseconds);
         // Add nanoseconds (converted to milliseconds)
         date.setMilliseconds(date.getMilliseconds() + nanoseconds / 1000000);
-        let livedate=new Date(Date.now()-date)
-      
+        let livedate = new Date(Date.now() - date)
+
 
 
         // Format the date and time
         // const readableDate = date.toISOString().replace('T', ' ').replace('Z', '');
         const readablehour = date.getHours();
         const readablemin = date.getMinutes();
-        console.log(date.getDate()+":"+readablehour+":"+readablemin)
-        console.log("difference"+livedate.getDate()+":"+livedate.getUTCHours()+":"+livedate.getUTCMinutes())
-        if(livedate.getDate()>1){
-            return `${date.getDate()}/${date.getMonth()+1}-${readablehour}:${readablemin}`
+        console.log(date.getDate() + ":" + readablehour + ":" + readablemin)
+        console.log("difference" + livedate.getDate() + ":" + livedate.getUTCHours() + ":" + livedate.getUTCMinutes())
+        if (livedate.getDate() > 1) {
+            return `${date.getDate()}/${date.getMonth() + 1}-${readablehour}:${readablemin}`
         }
-        else{
-            if(livedate.getUTCHours()>0)
-             return `${livedate.getUTCHours()}:${livedate.getUTCMinutes()} hours ago`
+        else {
+            if (livedate.getUTCHours() > 0)
+                return `${livedate.getUTCHours()}:${livedate.getUTCMinutes()} hours ago`
             else
-            return `${livedate.getUTCMinutes()} min ago`
+                return `${livedate.getUTCMinutes()} min ago`
 
         }
-    } 
+    }
 
     const mql = window.matchMedia('(max-width: 600px)');
     let mobileView = mql.matches;
@@ -132,11 +130,11 @@ function Chat({ setDetails, details }) {
         <div className='chat' style={mobileView ? { display: !details ? "flex" : "none" } : {}} >
             <div className="top">
                 <div className="user">
-                    <img className="close" src="./back.png" alt="" onClick={() => {setDetails(false);backchat()}} />
+                    <img className="close" src="./back.png" alt="" onClick={() => { setDetails(false); backchat() }} />
                     <img src={user?.avatar || "./avatar.png"} alt="" onClick={() => setDetails(prev => !prev)} />
                     <div className="texts">
                         <span>{user?.username || "user illa"}</span>
-                        <p>Lorem ipsum dolor sit amet.</p>
+                        <p>{user?.bio || "lets gossip"}</p>
                     </div>
                 </div>
                 <div className="icons">
@@ -148,46 +146,62 @@ function Chat({ setDetails, details }) {
                 {chat?.message?.map((message) => (
                     <div className={message.senderId == CurrentUser.id ? "message own" : "message"} key={message?.createdAt}>
                         <div className="text">
-                            
+
                             {message.img && <img src={message.img} alt="" />}
 
-                            <p>{message.text}</p>
+                            {message.text&&<p>{message.text}</p>}
                             <span>
-                                {parsetime(message.createdAt.seconds,message.createdAt.nanoseconds)}
+                                {parsetime(message.createdAt.seconds, message.createdAt.nanoseconds)}
                             </span>
                         </div>
                     </div>
                 ))}
-                {image.url && <div className="message own">
-                    <div className="texts">
-                        <img src={image.url} alt="" />
-                    </div>
-                </div>}
+                
                 <div ref={endRef} style={{ height: "1px" }}></div>
+
             </div>
             <div className="bottom">
                 {isCurrentBlocked || isReceiverBlocked ? isCurrentBlocked ? <div className='blocked'>Sorry, the user is fed-up with you , you can not reply to this message anymore</div> : <div className='blocked'>you have blocked this user</div>
                     : <>
+                        <div className='btcontain'>
+                            {image.file&&<div className='inputimg'>
+                                <div className='imgitems'>
 
-                        <div className="icons">
-                            <label htmlFor="file">
+                                    <div className="close">
+                                        <img src="./close.png" alt="" onClick={() => setImage({
+                                            file: null,
+                                            url: ""
+                                        })} />
+                                    </div>
+                                    <img src={image.url} alt="" />
+                                </div>
+                            </div>}
+                            <div className="input">
 
-                                <img src="./img.png" alt="" />
-                            </label>
-                            <input type="file" id='file' style={{ display: "none" }} onChange={handleImage} />
-                            <img src="./camera.png" alt="" />
-                            <img src="./mic.png" alt="" />
-                        </div>
-                        <input type="text" placeholder='type the fucking message!!' value={text} onChange={e => settext(e.target.value)} />
-                        <div className="emoji">
-                            <img src="./emoji.png" alt="" onClick={() => seteopen(!eopen)} />
-                            <div className="picker">
+                                <div className="icons">
+                                    <label htmlFor="file">
 
-                                <EmojiPicker open={eopen} onEmojiClick={handleEmoji} theme='auto' height={350} lazyLoadEmojis={true} autoFocusSearch={false} />
+                                        <img src="./img.png" alt="" />
+                                    </label>
+                                    <input type="file" id='file' style={{ display: "none" }} onChange={handleImage} />
+                                    <img src="./camera.png" alt="" />
+                                    <img src="./mic.png" alt="" />
+                                </div>
+
+                                <input type="text" placeholder='type the fucking message!!' value={text} onChange={e => settext(e.target.value)} />
+
+                                <div className="emoji">
+                                    <img src="./emoji.png" alt="" onClick={() => seteopen(!eopen)} />
+                                    <div className="picker">
+                                        <EmojiPicker open={eopen} onEmojiClick={handleEmoji} theme='auto' height={350} lazyLoadEmojis={true} autoFocusSearch={false} />
+                                    </div>
+
+                                </div>
+                                <button className='sendBtn' onClick={handleSend}>send</button>
                             </div>
 
                         </div>
-                        <button className='sendBtn' onClick={handleSend}>send</button>
+
                     </>}
 
 

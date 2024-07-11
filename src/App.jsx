@@ -33,8 +33,8 @@ const App = () => {
       
       {CurrentUser ? (<>
 
-        <List  setProfile={setProfile}/>
-      {(profile)&&<Details setDetails={setDetails} profile={profile}/>}
+        <List  setProfile={setProfile} profile={profile}/>
+      {(profile)&&<Details setDetails={setProfile} profile={profile}/>}
         {chatId && <Chat setDetails={setDetails} details={details}/>}
         {
            details ? (<Details setDetails={setDetails} profile={false}/>) : (<></>)
