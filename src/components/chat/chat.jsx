@@ -20,7 +20,8 @@ function Chat({ setDetails, details }) {
         url: []
     })
     const [typing, setTyping] = useState(false)
-    const[usertyping,setUsertyping]=useState(false)
+    const [usertyping, setUsertyping] = useState(false)
+    const [seen, setSeen] = useState(false)
 
 
     useEffect(() => {
@@ -29,8 +30,7 @@ function Chat({ setDetails, details }) {
     useEffect(() => {
 
         const unSub = onSnapshot(doc(db, "Chats", chatId), async (res) => {
-            await setChat(res.data())
-            setchats(res.data())
+            await setChat(res.data().message)
         })
 
         return () => {
@@ -40,19 +40,34 @@ function Chat({ setDetails, details }) {
     }, [chatId])
     useEffect(() => {
 
-        const unSub =  onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
+        const unSub = onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
             if (res.exists()) {
                 const userChatData = res.data();
                 const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
                 setUsertyping(userChatData.chats[chatIndex].istyping)
+                setSeen(userChatData.chats[chatIndex].isSeen)
             }
         })
-            
-            
-            
-    
+
         return () => {
             unSub()
+
+        }
+
+    }, [chatId])
+    useEffect(() => {
+
+        const unSub = onSnapshot(doc(db, "Userchats", user.id), async (res) => {
+            if (res.exists()) {
+                const userChatData = res.data();
+                const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
+                setSeen(userChatData.chats[chatIndex].isSeen)
+            }
+        })
+
+        return () => {
+            unSub()
+
         }
 
     }, [chatId])
@@ -81,7 +96,7 @@ function Chat({ setDetails, details }) {
                     senderId: CurrentUser.id,
                     text,
                     createdAt: new Date(),
-                    ...(imgurl.length!=0 && { img: imgurl }),
+                    ...(imgurl.length != 0 && { img: imgurl }),
 
                 })
             });
@@ -202,9 +217,9 @@ function Chat({ setDetails, details }) {
 
 
         }
-        setTimeout(async() => {
+        setTimeout(async () => {
 
-            if (e.target.value == temp) {
+            if (e.target.value == temp || text == "" || text == null) {
 
                 setTyping(false)
                 userChatData.chats[chatIndex].istyping = false;
@@ -225,7 +240,7 @@ function Chat({ setDetails, details }) {
     const mql = window.matchMedia('(max-width: 600px)');
     let mobileView = mql.matches;
     return (
-        
+
         <div className='chat' style={mobileView ? { display: !details ? "flex" : "none" } : {}} >
             <div className="top">
                 <div className="user">
@@ -242,7 +257,7 @@ function Chat({ setDetails, details }) {
                 </div>
             </div>
             <div className="center">
-                {chat?.message?.map((message) => (
+                {chat?.map((message, index) => (
                     <div className={message.senderId == CurrentUser.id ? "message own" : "message"} key={message?.createdAt}>
                         <div className="text">
                             {message.img && message.img.map((img, index) => (
@@ -251,15 +266,19 @@ function Chat({ setDetails, details }) {
                             }
 
                             {message.text && <p>{message.text}</p>}
-                            <span>
+                            <span >
                                 {parsetime(message.createdAt.seconds, message.createdAt.nanoseconds)}
                             </span>
                         </div>
                     </div>
                 ))}
-                {usertyping&&<div className="message">
-                    
-                    <div className="text" ><Typing/></div>
+                {seen && <div className="message own">
+
+                    <div className="text" style={{ fontSize: "11px", position: "relative", top: "-10px" }} >seen</div>
+                </div>}
+                {usertyping && <div className="message">
+
+                    <div className="text" ><Typing /></div>
                 </div>}
 
                 <div ref={endRef} style={{ height: "1px" }}></div>
