@@ -23,7 +23,7 @@ function Chat({ setDetails, details }) {
 
 
     useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth" , block: "end"});
+        endRef.current?.scrollIntoView({ behavior: "smooth" , block: "center"});
     })
     useEffect(() => {
 
