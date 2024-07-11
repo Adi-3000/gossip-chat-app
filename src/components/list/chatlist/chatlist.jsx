@@ -16,8 +16,6 @@ function Chatlist({hidchat}) {
     useEffect(() => {
         const unsub = onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
             const items = res.data().chats;
-
-
             const promises = items.map(async (item) => {
                 const userdocRef = doc(db, "Users", item.receiverId);
                 const userdocSnap = await getDoc(userdocRef);
@@ -69,7 +67,7 @@ function Chatlist({hidchat}) {
                     <img src={chat.user.blocked.includes(CurrentUser.id)?"./avatar.png":chat.user.avatar || "./avatar.png"} alt="" />
                     {!hidchat&&<div className="text">
                         <span>{chat.user.blocked.includes(CurrentUser.id)?"user":chat.user.username}</span>
-                        <p>{chat.lastMessage}</p>
+                        <p>{chat.istyping?"typing":chat.lastMessage}</p>
                     </div>}
                 </div>
             ))}

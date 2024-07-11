@@ -41,6 +41,7 @@ function Adduser({setadduser}) {
           chatId:newChatRef.id,
           lastMessage:"",
           receiverId:CurrentUser.id,
+          istyping:false,
           updatedAt:Date.now()
         })
       })
@@ -49,6 +50,7 @@ function Adduser({setadduser}) {
           chatId:newChatRef.id,
           lastMessage:"",
           receiverId:user.id,
+          istyping:false,
           updatedAt:Date.now()
         })
       })

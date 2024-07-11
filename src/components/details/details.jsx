@@ -177,17 +177,20 @@ function Details({ setDetails, profile }) {
                     </div>
                     {expand[2] && <div className="photos">
                         {chats?.message?.map((message) => (
-                            message.img && <div className="photosItem" key={message?.createdAt} >
+                            message.img &&message.img.map((img)=>(
+
+                             <div className="photosItem" key={img} >
 
                                 <div className="photodetail">
-                                    {message.img && <img src={message.img} alt="" />}
+                                    {message.img && <img src={img.product} alt="" />}
 
                                     <span>demo_photo</span>
                                 </div>
-
+                                <a href={img.product} target="_blank"  download>
                                 <img src="./download.png" alt="" className='icon' />
+                                </a>
                             </div>
-
+                            ))
                         ))}
 
 

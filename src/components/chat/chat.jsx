@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import './chat.css'
 import { db } from '../../lib/firebase.js'
-
+import Typing from '../typing/typing.jsx'
 import EmojiPicker from 'emoji-picker-react'
 import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firestore';
 import { useChatStore } from '../../lib/chatstore.js';
@@ -19,18 +19,32 @@ function Chat({ setDetails, details }) {
         file: [],
         url: []
     })
+    const [typing, setTyping] = useState(false)
+    const[usertyping,setUsertyping]=useState(false)
 
 
     useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth" , block: "center"});
+        endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
     })
     useEffect(() => {
 
-        const unSub = onSnapshot(doc(db, "Chats", chatId), async (res) => {
+        const unSub = 
+        async()=>{
+            onSnapshot(doc(db, "Chats", chatId), async (res) => {
             await setChat(res.data())
             setchats(res.data())
-
         })
+        onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
+            if (res.exists()) {
+                const userChatData = res.data();
+                const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
+                setUsertyping(userChatData.chats[chatIndex].istyping)
+            }
+        })
+            
+            
+            
+    }
         return () => {
             unSub()
         }
@@ -42,32 +56,20 @@ function Chat({ setDetails, details }) {
         settext(prev => prev + e.emoji);
         seteopen(false)
     }
-    const handleupload=async()=>{
-        let trul=[];
-        await image.file.forEach(async (file) => {
-            
-            const temp=await upload(file)
-            console.log("handle up"+temp)
-            trul=[...trul,temp]
-            
-        })
-        return trul
-    }
+
     const handleSend = async () => {
-        if (text === ""&Object.keys(image.file).length==0) return;
-      
+        if (text === "" & Object.keys(image.file).length == 0) return;
+
         try {
-           
-                const imgurl= await Promise.all(
-                    
-                    image.file.map(async (file) => {
-                        const product = await upload(file);
-                        return {product};
-                    })
-                )
-                await console.log("imgurl")
-                await console.log(imgurl)
-            
+
+            const imgurl = await Promise.all(
+                image.file.map(async (file) => {
+                    const product = await upload(file);
+                    return { product };
+                })
+            )
+
+
             await updateDoc(doc(db, "Chats", chatId), {
                 message: arrayUnion({
                     senderId: CurrentUser.id,
@@ -104,27 +106,27 @@ function Chat({ setDetails, details }) {
         settext("")
 
     }
-    const handleImage = async(e) => {
+    const handleImage = async (e) => {
         if (e.target.files[0]) {
-            let temp=[]
-              temp=await [...e.target.files]
+            let temp = []
+            temp = await [...e.target.files]
 
-            let tempurl=[]
-            temp.map((file)=>{
-                tempurl=[...tempurl,URL.createObjectURL(file)]
+            let tempurl = []
+            temp.map((file) => {
+                tempurl = [...tempurl, URL.createObjectURL(file)]
             })
-            
+
 
             setImage({
-                file: [...image.file,...e.target.files],
+                file: [...image.file, ...e.target.files],
                 url: [...image.url
-                    ,...tempurl]
+                    , ...tempurl]
 
             })
         }
-        
+
     }
-    console.log(image)
+
     function parsetime(seconds, nanoseconds) {
         const milliseconds = seconds * 1000;
         const date = new Date(milliseconds);
@@ -151,22 +153,73 @@ function Chat({ setDetails, details }) {
 
         }
     }
-    async function handlecloseimg (index) {
-        console.log("img index"+index)
-        
-      await image.url.splice(index,1)
-      await image.file.splice(index,1)
-      await setImage({
-            file:[...image.file],
-            url:[...image.url]
+    async function handlecloseimg(index) {
+
+
+        await image.url.splice(index, 1)
+        await image.file.splice(index, 1)
+        await setImage({
+            file: [...image.file],
+            url: [...image.url]
         })
-        
+
+    }
+    const handleinput = async (e) => {
+        settext(e.target.value)
+        const userChatRef = doc(db, "Userchats", user.id);
+        const userChatSnap = await getDoc(userChatRef);
+        let userChatData, chatIndex
+        if (userChatSnap.exists()) {
+            userChatData = userChatSnap.data();
+            chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
+            userChatData.chats[chatIndex].updatedAt = Date.now();
+        }
+
+        const temp = e.target.value
+        if (e.target.value == "" || e.target.value == null) {
+            setTyping(false)
+            userChatData.chats[chatIndex].istyping = false;
+            await updateDoc(userChatRef, {
+                chats: userChatData.chats,
+            })
+            console.log("typing stopped")
+
+        }
+        else if (!typing) {
+
+            setTyping(true)
+            userChatData.chats[chatIndex].istyping = true;
+            await updateDoc(userChatRef, {
+                chats: userChatData.chats,
+            })
+            console.log("typing ")
+
+
+        }
+        setTimeout(async() => {
+
+            if (e.target.value == temp) {
+
+                setTyping(false)
+                userChatData.chats[chatIndex].istyping = false;
+                await updateDoc(userChatRef, {
+                    chats: userChatData.chats,
+                })
+                console.log("typing stoped")
+
+            }
+
+        }, 4000)
+
+
+
     }
 
-  
+
     const mql = window.matchMedia('(max-width: 600px)');
     let mobileView = mql.matches;
     return (
+        
         <div className='chat' style={mobileView ? { display: !details ? "flex" : "none" } : {}} >
             <div className="top">
                 <div className="user">
@@ -187,20 +240,24 @@ function Chat({ setDetails, details }) {
                     <div className={message.senderId == CurrentUser.id ? "message own" : "message"} key={message?.createdAt}>
                         <div className="text">
 
-                            {message.img&&message.img.map((img,index)=>(
+                            {message.img && message.img.map((img, index) => (
 
-                                <img src={img.product} alt="" key={index}/>
+                                <img src={img.product} alt="" key={index} />
                             ))
                             }
 
-                            {message.text&&<p>{message.text}</p>}
+                            {message.text && <p>{message.text}</p>}
                             <span>
                                 {parsetime(message.createdAt.seconds, message.createdAt.nanoseconds)}
                             </span>
                         </div>
                     </div>
                 ))}
-                
+                {usertyping&&<div className="message">
+                    
+                    <div className="text" ><Typing/></div>
+                </div>}
+
                 <div ref={endRef} style={{ height: "1px" }}></div>
 
             </div>
@@ -208,15 +265,15 @@ function Chat({ setDetails, details }) {
                 {isCurrentBlocked || isReceiverBlocked ? isCurrentBlocked ? <div className='blocked'>Sorry, the user is fed-up with you , you can not reply to this message anymore</div> : <div className='blocked'>you have blocked this user</div>
                     : <>
                         <div className='btcontain'>
-                            {Object.keys(image.file).length!=0&&<div className='inputimg'>
-                                {image.url.map((img,index)=>(
-                                    
-                                <div className='imgitems' key={index}>
-                                    <div className="close" >
-                                        <img src="./close.png" alt=""  onClick={()=>handlecloseimg(index)}/>
+                            {Object.keys(image.file).length != 0 && <div className='inputimg'>
+                                {image.url.map((img, index) => (
+
+                                    <div className='imgitems' key={index}>
+                                        <div className="close" >
+                                            <img src="./close.png" alt="" onClick={() => handlecloseimg(index)} />
+                                        </div>
+                                        <img src={img} alt="" />
                                     </div>
-                                    <img src={img} alt="" />
-                                </div>
                                 ))}
                             </div>}
                             <div className="input">
@@ -231,7 +288,7 @@ function Chat({ setDetails, details }) {
                                     <img src="./mic.png" alt="" />
                                 </div>
 
-                                <input type="text" placeholder='type the fucking message!!' value={text} onChange={e => settext(e.target.value)} />
+                                <input type="text" placeholder='type the message!!' value={text} onChange={handleinput} />
 
                                 <div className="emoji">
                                     <img src="./emoji.png" alt="" onClick={() => seteopen(!eopen)} />
