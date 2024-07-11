@@ -16,10 +16,9 @@ function Chat({ setDetails, details }) {
     const { chatId, user, isCurrentBlocked, isReceiverBlocked, backchat, setchats } = useChatStore();
     const { CurrentUser } = useUserStore();
     const [image, setImage] = useState({
-        file: null,
-        url: ""
+        file: [],
+        url: []
     })
-
 
 
     useEffect(() => {
@@ -37,20 +36,38 @@ function Chat({ setDetails, details }) {
         }
 
     }, [chatId])
-    console.log("chats??")
-    console.log(chat)
+
 
     const handleEmoji = e => {
         settext(prev => prev + e.emoji);
         seteopen(false)
     }
+    const handleupload=async()=>{
+        let trul=[];
+        await image.file.forEach(async (file) => {
+            
+            const temp=await upload(file)
+            console.log("handle up"+temp)
+            trul=[...trul,temp]
+            
+        })
+        return trul
+    }
     const handleSend = async () => {
-        if (text === ""&!image.file) return;
-        let imgurl = null;
+        if (text === ""&Object.keys(image.file).length==0) return;
+      
         try {
-            if (image.file) {
-                imgurl = await upload(image.file)
-            }
+           
+                const imgurl= await Promise.all(
+                    
+                    image.file.map(async (file) => {
+                        const product = await upload(file);
+                        return {product};
+                    })
+                )
+                await console.log("imgurl")
+                await console.log(imgurl)
+            
             await updateDoc(doc(db, "Chats", chatId), {
                 message: arrayUnion({
                     senderId: CurrentUser.id,
@@ -81,22 +98,33 @@ function Chat({ setDetails, details }) {
             console.log(error)
         }
         setImage({
-            file: null,
-            url: ""
+            file: [],
+            url: []
         })
         settext("")
 
     }
-    const handleImage = e => {
+    const handleImage = async(e) => {
         if (e.target.files[0]) {
+            let temp=[]
+              temp=await [...e.target.files]
+
+            let tempurl=[]
+            temp.map((file)=>{
+                tempurl=[...tempurl,URL.createObjectURL(file)]
+            })
+            
 
             setImage({
-                file: e.target.files[0],
-                url: URL.createObjectURL(e.target.files[0])
+                file: [...image.file,...e.target.files],
+                url: [...image.url
+                    ,...tempurl]
 
             })
         }
+        
     }
+    console.log(image)
     function parsetime(seconds, nanoseconds) {
         const milliseconds = seconds * 1000;
         const date = new Date(milliseconds);
@@ -110,8 +138,8 @@ function Chat({ setDetails, details }) {
         // const readableDate = date.toISOString().replace('T', ' ').replace('Z', '');
         const readablehour = date.getHours();
         const readablemin = date.getMinutes();
-        console.log(date.getDate() + ":" + readablehour + ":" + readablemin)
-        console.log("difference" + livedate.getDate() + ":" + livedate.getUTCHours() + ":" + livedate.getUTCMinutes())
+        // console.log(date.getDate() + ":" + readablehour + ":" + readablemin)
+        // console.log("difference" + livedate.getDate() + ":" + livedate.getUTCHours() + ":" + livedate.getUTCMinutes())
         if (livedate.getDate() > 1) {
             return `${date.getDate()}/${date.getMonth() + 1}-${readablehour}:${readablemin}`
         }
@@ -123,7 +151,19 @@ function Chat({ setDetails, details }) {
 
         }
     }
+    async function handlecloseimg (index) {
+        console.log("img index"+index)
+        
+      await image.url.splice(index,1)
+      await image.file.splice(index,1)
+      await setImage({
+            file:[...image.file],
+            url:[...image.url]
+        })
+        
+    }
 
+  
     const mql = window.matchMedia('(max-width: 600px)');
     let mobileView = mql.matches;
     return (
@@ -147,7 +187,11 @@ function Chat({ setDetails, details }) {
                     <div className={message.senderId == CurrentUser.id ? "message own" : "message"} key={message?.createdAt}>
                         <div className="text">
 
-                            {message.img && <img src={message.img} alt="" />}
+                            {message.img&&message.img.map((img,index)=>(
+
+                                <img src={img.product} alt="" key={index}/>
+                            ))
+                            }
 
                             {message.text&&<p>{message.text}</p>}
                             <span>
@@ -164,17 +208,16 @@ function Chat({ setDetails, details }) {
                 {isCurrentBlocked || isReceiverBlocked ? isCurrentBlocked ? <div className='blocked'>Sorry, the user is fed-up with you , you can not reply to this message anymore</div> : <div className='blocked'>you have blocked this user</div>
                     : <>
                         <div className='btcontain'>
-                            {image.file&&<div className='inputimg'>
-                                <div className='imgitems'>
-
-                                    <div className="close">
-                                        <img src="./close.png" alt="" onClick={() => setImage({
-                                            file: null,
-                                            url: ""
-                                        })} />
+                            {Object.keys(image.file).length!=0&&<div className='inputimg'>
+                                {image.url.map((img,index)=>(
+                                    
+                                <div className='imgitems' key={index}>
+                                    <div className="close" >
+                                        <img src="./close.png" alt=""  onClick={()=>handlecloseimg(index)}/>
                                     </div>
-                                    <img src={image.url} alt="" />
+                                    <img src={img} alt="" />
                                 </div>
+                                ))}
                             </div>}
                             <div className="input">
 
@@ -183,7 +226,7 @@ function Chat({ setDetails, details }) {
 
                                         <img src="./img.png" alt="" />
                                     </label>
-                                    <input type="file" id='file' style={{ display: "none" }} onChange={handleImage} />
+                                    <input type="file" id='file' style={{ display: "none" }} onChange={handleImage} multiple />
                                     <img src="./camera.png" alt="" />
                                     <img src="./mic.png" alt="" />
                                 </div>

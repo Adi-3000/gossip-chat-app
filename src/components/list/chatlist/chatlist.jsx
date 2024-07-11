@@ -73,7 +73,7 @@ function Chatlist({hidchat}) {
                     </div>}
                 </div>
             ))}
-            {adduser ? <Adduser /> : <></>}
+            {adduser ? <Adduser setadduser={setadduser}/> : <></>}
 
 
 

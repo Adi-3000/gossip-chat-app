@@ -4,21 +4,19 @@ import { arrayUnion, collection, doc, getDoc, getDocs, query, serverTimestamp, s
 import { db } from '../../../../lib/firebase';
 import { useUserStore } from '../../../../lib/Userstore';
 
-function Adduser() {
+function Adduser({setadduser}) {
   const [user,setUser]=useState(null)
   const { CurrentUser } = useUserStore();
 
   const handleSearch = async (e) => {
     e.preventDefault()
     const formdata = new FormData(e.target);
-    const { username } = Object.fromEntries(formdata)
-    console.log("username to search"+username)
+    const { email } = Object.fromEntries(formdata)
     try {
       const UserRef = collection(db, "Users");
-      const q = query(UserRef, where("username", "==", username));
+      const q = query(UserRef, where("email", "==", email.toLowerCase()));
       const querysnap=await getDocs(q)
       if(!querysnap.empty){
-        console.log("qsnap",querysnap.docs)
         setUser(querysnap.docs[0].data())
 
       }
@@ -57,11 +55,14 @@ function Adduser() {
     } catch (error) {
       console.log(error)
     }
+    finally{
+      setadduser(false)
+    }
   }
   return (
     <div className='adduser'>
       <form action="" onSubmit={handleSearch}>
-        <input type="text" placeholder='Username' name="username" />
+        <input type="text" placeholder='email' name="email" />
         <button> Search</button>
 
       </form>{user&&

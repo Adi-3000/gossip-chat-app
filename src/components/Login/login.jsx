@@ -69,7 +69,7 @@ function Login({ setUser }) {
             const imgurl = avatar.file ? await upload(avatar.file) : null;
             await setDoc(doc(db, "Users", res.user.uid), {
                 username,
-                email,
+                email:email.toLowerCase(),
                 avatar: imgurl,
                 id: res.user.uid,
                 blocked: []
