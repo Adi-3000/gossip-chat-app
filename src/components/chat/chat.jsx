@@ -28,13 +28,19 @@ function Chat({ setDetails, details }) {
     })
     useEffect(() => {
 
-        const unSub = 
-        async()=>{
-            onSnapshot(doc(db, "Chats", chatId), async (res) => {
+        const unSub = onSnapshot(doc(db, "Chats", chatId), async (res) => {
             await setChat(res.data())
             setchats(res.data())
         })
-        onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
+
+        return () => {
+            unSub()
+        }
+
+    }, [chatId])
+    useEffect(() => {
+
+        const unSub =  onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
             if (res.exists()) {
                 const userChatData = res.data();
                 const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
@@ -44,7 +50,7 @@ function Chat({ setDetails, details }) {
             
             
             
-    }
+    
         return () => {
             unSub()
         }
