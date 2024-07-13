@@ -111,6 +111,8 @@ console.log("seen status"+seen)
                     const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
                     userChatData.chats[chatIndex].lastMessage = text;
                     userChatData.chats[chatIndex].isSeen = id === CurrentUser.id ? true : false;
+                    userChatData.chats[chatIndex].istyping =  false;
+
                     userChatData.chats[chatIndex].updatedAt = Date.now();
                     await updateDoc(userChatRef, {
                         chats: userChatData.chats,
