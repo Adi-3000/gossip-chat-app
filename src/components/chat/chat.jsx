@@ -24,9 +24,11 @@ function Chat({ setDetails, details }) {
     const [seen, setSeen] = useState(false)
 
 
+    //for scrolling to view
     useEffect(() => {
-        endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+        endRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     })
+    //for loading chat
     useEffect(() => {
 
         const unSub = onSnapshot(doc(db, "Chats", chatId), async (res) => {
@@ -38,6 +40,7 @@ function Chat({ setDetails, details }) {
         }
 
     }, [chatId])
+    //for checking typing status
     useEffect(() => {
 
         const unSub = onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
@@ -45,7 +48,6 @@ function Chat({ setDetails, details }) {
                 const userChatData = res.data();
                 const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
                 setUsertyping(userChatData.chats[chatIndex].istyping)
-                setSeen(userChatData.chats[chatIndex].isSeen)
             }
         })
 
@@ -55,8 +57,9 @@ function Chat({ setDetails, details }) {
         }
 
     }, [chatId])
-    useEffect(() => {
+    //for checking seen status
 
+    useEffect(() => {
         const unSub = onSnapshot(doc(db, "Userchats", user.id), async (res) => {
             if (res.exists()) {
                 const userChatData = res.data();
@@ -64,15 +67,13 @@ function Chat({ setDetails, details }) {
                 setSeen(userChatData.chats[chatIndex].isSeen)
             }
         })
-
         return () => {
             unSub()
-
         }
 
     }, [chatId])
 
-
+console.log("seen status"+seen)
     const handleEmoji = e => {
         settext(prev => prev + e.emoji);
         seteopen(false)
@@ -101,9 +102,10 @@ function Chat({ setDetails, details }) {
                 })
             });
             const userIds = [CurrentUser.id, user.id]
-            userIds.forEach(async (id) => {
+            await userIds.forEach(async (id) => {
                 const userChatRef = doc(db, "Userchats", id);
                 const userChatSnap = await getDoc(userChatRef);
+                
                 if (userChatSnap.exists()) {
                     const userChatData = userChatSnap.data();
                     const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
@@ -185,17 +187,19 @@ function Chat({ setDetails, details }) {
         })
 
     }
+    const[userChatData,setuserChatData]=useState()
     const handleinput = async (e) => {
         settext(e.target.value)
-        const userChatRef = doc(db, "Userchats", user.id);
-        const userChatSnap = await getDoc(userChatRef);
-        let userChatData, chatIndex
-        if (userChatSnap.exists()) {
-            userChatData = userChatSnap.data();
-            chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
-            userChatData.chats[chatIndex].updatedAt = Date.now();
-        }
-
+        const userChatRef = await doc(db, "Userchats", user.id);
+        // const userChatSnap = await getDoc(userChatRef);
+        let chatIndex
+        await onSnapshot(userChatRef, async (res) => {
+            setuserChatData(await res.data())
+        })
+        chatIndex = await userChatData.chats.findIndex(c => c.chatId == chatId)
+        userChatData.chats[chatIndex].updatedAt = Date.now();
+        
+    
         const temp = e.target.value
         if (e.target.value == "" || e.target.value == null) {
             setTyping(false)
@@ -204,16 +208,16 @@ function Chat({ setDetails, details }) {
                 chats: userChatData.chats,
             })
             console.log("typing stopped")
-
         }
         else if (!typing) {
 
             setTyping(true)
+            console.log(userChatData.chats)
             userChatData.chats[chatIndex].istyping = true;
+            console.log("typing ")
             await updateDoc(userChatRef, {
                 chats: userChatData.chats,
             })
-            console.log("typing ")
 
 
         }

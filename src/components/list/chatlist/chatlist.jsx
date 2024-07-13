@@ -32,6 +32,8 @@ function Chatlist({hidchat}) {
         };
     }, [CurrentUser.id])
     console.log("Current chats: ", chats);
+
+    
     const handleSelect = async (chat) => {
         const userchats = chats.map((item) => {
             const { user, ...rest } = item;
