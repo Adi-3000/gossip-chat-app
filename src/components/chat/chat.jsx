@@ -43,23 +43,27 @@ function Chat({ setDetails, details }) {
     //for checking typing status
     useEffect(() => {
 
-        const unSub = onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
-            if (res.exists()) {
-                const userChatData = res.data();
-                const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
-                setUsertyping(userChatData.chats[chatIndex].istyping)
+            const unSub = onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
+                if (res.exists()) {
+                    const userChatData = res.data();
+                    const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
+                    setUsertyping(userChatData.chats[chatIndex].istyping)
+                }
+            })
+            return () => {
+                unSub()
+    
             }
-        })
+        
 
-        return () => {
-            unSub()
-
-        }
+        
 
     }, [chatId])
     //for checking seen status
 
     useEffect(() => {
+        if(user){
+
         const unSub = onSnapshot(doc(db, "Userchats", user.id), async (res) => {
             if (res.exists()) {
                 const userChatData = res.data();
@@ -70,6 +74,7 @@ function Chat({ setDetails, details }) {
         return () => {
             unSub()
         }
+    }
 
     }, [chatId])
 
