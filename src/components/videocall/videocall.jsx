@@ -43,10 +43,8 @@ function Vc({ setvc, video }) {
             setCurrentPage("join")
             setJoinCode(callid)
         }
-
-
-
     })
+    console.log("current page:"+currentPage)
 
 
 
@@ -134,15 +132,9 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
     useEffect(() => {
 
         return () => {
+            console.log("called:"+callid)
 
-            if (callid) {
-                setupSources("join")
-
-            }
-            else {
-                setupSources("create")
-            }
-
+                setupSources(callid?"join":"create")
         }
     }, [chatId])
 
@@ -182,10 +174,8 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
 
             if (mode === "create") {
 
-
                 console.log("called create")
                 const callDoc = await doc(collection(db, "calls"));
-
                 const offerCandidates = await collection(callDoc, "offerCandidates");
                 const answerCandidates = await collection(callDoc, "answerCandidates");
                 console.log(callDoc)
