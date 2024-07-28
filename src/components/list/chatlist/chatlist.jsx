@@ -20,11 +20,16 @@ function Chatlist({ hidchat }) {
                 const userdocSnap = await getDoc(userdocRef);
                 const user = userdocSnap.data();
                 console.log(user)
+                if(item.receiverId==caller){
+                    if(item.callid==null)
+                        setcall(null,null,null,null);
+                }
                 if(item.callid)
                     setcall(item.callid,item.caller,null,item.callmode)
                 return { ...item, user }
                 
             });
+            if(callid==null)setcall(null,null,null,null);
             const chatData = await Promise.all(promises)
 
             setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
@@ -78,7 +83,7 @@ function Chatlist({ hidchat }) {
                     {!hidchat && <div className="text">
                         <span>{chat.user.blocked.includes(CurrentUser.id) ? "user" : chat.user.username}</span>
                         {!chat.callid && <p>{chat.istyping ? "typing" : chat.lastMessage}</p>}
-                        {callid&&caller != CurrentUser.id&&caller==chat.receiverId&&status==null&& <div className='call-noti'>
+                        {chat.callid&&chat.caller != CurrentUser.id&&chat.caller==chat.receiverId&&chat.status!="accept"&& <div className='call-noti'>
                             
                                 <div className="name">
                                     <p className="p2">Incoming Call</p>
