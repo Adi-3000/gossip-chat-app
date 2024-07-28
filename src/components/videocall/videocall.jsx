@@ -169,7 +169,6 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
         localStream.getTracks().forEach((track) => {
             pc.addTrack(track, localStream);
         });
-
         pc.ontrack = (event) => {
             event.streams[0].getTracks().forEach((track) => {
                 remoteStream.addTrack(track);
