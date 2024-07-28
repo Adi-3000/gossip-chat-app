@@ -10,6 +10,17 @@ export const useChatStore = create((set) => ({
     isReceiverBlocked: false,
     isLoading: true,
     chats:null,
+    callid:null,
+    caller:null,
+    status:null,
+    callmode:null,
+    setcall:(callid,caller,status,callmode)=>{
+        return set(state => ({
+            ...state, callid:callid,caller:caller,status:status,callmode:callmode
+        }))
+    },
+    
+    
     changeChat: (chatId, user) => {
         const CurrentUser = useUserStore.getState().CurrentUser;
         console.log("store chatid", chatId)

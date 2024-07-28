@@ -1,0 +1,119 @@
+.videos {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: 10px;
+
+  video {
+    border-radius: 15px;
+  }
+
+  .remote {
+    width: 80%;
+    height: 80%;
+    border: 1px solid black;
+    object-fit: cover;
+  }
+
+  .local {
+    width: 30%;
+    height: 30%;
+    position: relative;
+    top: -28%;
+    right: -23%;
+  }
+
+  .control {
+    background-color: rgb(30 39 57 / 47%);
+    display: flex;
+    width: 80%;
+    gap: 15%;
+    height: 45px;
+    border-radius: 15px;
+    justify-content: space-around;
+
+    .mic,.camera,.end{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      .button {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 100%;
+        border: none;
+        background-color: #FF2849;
+      }
+      
+      .button:hover {
+        background-color: #e52441;
+      }
+      /*------ Settings ------*/
+      .mute {
+        --color: #a5a5b0;
+        --size: 30px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        cursor: pointer;
+        font-size: var(--size);
+        -webkit-user-select: none;
+        user-select: none;
+        fill: var(--color);
+      }
+
+      .mute .microphone-slash {
+        position: relative;
+        animation: keyframes-fill .5s;
+      }
+
+      .mute .microphone {
+        position: relative;
+        display: none;
+        animation: keyframes-fill .5s;
+      }
+
+      /* ------ On check event ------ */
+      .mute input:checked~.microphone-slash {
+        display: none;
+      }
+
+      .mute input:checked~.microphone {
+        display: block;
+      }
+
+      /* ------ Hide the default checkbox ------ */
+      .mute input {
+        position: relative;
+        opacity: 0;
+        cursor: pointer;
+        height: 0;
+        width: 0;
+      }
+    }
+
+
+
+  }
+
+}
+
+/* ------ Animation for mute ------ */
+
+@keyframes keyframes-fill {
+  0% {
+    transform: rotate(0deg) scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: rotate(-10deg) scale(1.2);
+  }
+}

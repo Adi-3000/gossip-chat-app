@@ -4,20 +4,19 @@ import { useUserStore } from '../../../lib/Userstore'
 import { auth } from '../../../lib/firebase'
 import { useChatStore } from '../../../lib/chatstore'
 
-function Userinfo({ setHidchat, hidchat,setProfile}) {
+function Userinfo({ setHidchat, hidchat, setProfile }) {
   const { CurrentUser } = useUserStore()
-  const { chatId} = useChatStore();
+  const { chatId } = useChatStore();
 
-console.log(hidchat)
+  console.log(hidchat)
   return (
-    
-    <div className='userInfo'>
-      <div className="user" style={hidchat?{gap:"10px"}:{}}>
-        <img src={CurrentUser.avatar || "./avatar.png"} alt="" onClick={()=>setProfile((prev)=>!prev)} />
-        {hidchat&&<div className="icon" >
-          <img src="./back.png" alt="" onClick={() => {
-            setProfile(false)
 
+    <div className='userInfo'>
+      <div className="user" style={hidchat ? { gap: "10px" } : {}}>
+        <img src={CurrentUser.avatar || "./avatar.png"} alt="" onClick={() => setProfile((prev) => !prev)} />
+        {hidchat && <div className="icon" >
+          <img src="./back.png" alt="" onClick={() => {
+            setHidchat((prev) => !prev)
           }} style={{ transform: "rotate(180deg)" }} />
         </div>}
         <h2>{CurrentUser.username} </h2>
@@ -34,7 +33,7 @@ console.log(hidchat)
 
             <ul>
               <li>
-                <button onClick={()=>setProfile((prev)=>!prev)}>
+                <button onClick={() => setProfile((prev) => !prev)}>
                   <svg
                     viewBox="0 0 24 24"
                     fill="white"
@@ -83,7 +82,7 @@ console.log(hidchat)
 
 
     </div>
-  
+
   )
 }
 

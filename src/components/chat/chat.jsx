@@ -7,13 +7,14 @@ import { arrayUnion, doc, getDoc, onSnapshot, updateDoc } from 'firebase/firesto
 import { useChatStore } from '../../lib/chatstore.js';
 import { useUserStore } from '../../lib/Userstore.js';
 import upload from '../../lib/upload.js';
+import Vc from '../videocall/videocall.jsx'
 
 function Chat({ setDetails, details }) {
     const [eopen, seteopen] = useState(false);
     const [text, settext] = useState('');
     const [chat, setChat] = useState();
     const endRef = useRef(null)
-    const { chatId, user, isCurrentBlocked, isReceiverBlocked, backchat, setchats } = useChatStore();
+    const { chatId, user, isCurrentBlocked, isReceiverBlocked, backchat, setchats, callid, caller, setcall, status, callmode } = useChatStore();
     const { CurrentUser } = useUserStore();
     const [image, setImage] = useState({
         file: [],
@@ -32,7 +33,7 @@ function Chat({ setDetails, details }) {
     useEffect(() => {
 
         const unSub = onSnapshot(doc(db, "Chats", chatId), async (res) => {
-            await setChat(res.data().message)
+            await setChat(res.data())
         })
 
         return () => {
@@ -43,42 +44,64 @@ function Chat({ setDetails, details }) {
     //for checking typing status
     useEffect(() => {
 
-            const unSub = onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
-                if (res.exists()) {
-                    const userChatData = res.data();
-                    const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
-                    setUsertyping(userChatData.chats[chatIndex].istyping)
-                }
-            })
-            return () => {
-                unSub()
-    
+        const unSub = onSnapshot(doc(db, "Userchats", CurrentUser.id), async (res) => {
+            if (res.exists()) {
+                const userChatData = res.data();
+                const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
+                setUsertyping(userChatData.chats[chatIndex].istyping)
             }
-        
+        })
+        return () => {
+            unSub()
 
-        
+        }
+
+
+
 
     }, [chatId])
     //for checking seen status
 
     useEffect(() => {
-        if(user){
+        if (user) {
 
-        const unSub = onSnapshot(doc(db, "Userchats", user.id), async (res) => {
-            if (res.exists()) {
-                const userChatData = res.data();
-                const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
-                setSeen(userChatData.chats[chatIndex].isSeen)
+            const unSub = onSnapshot(doc(db, "Userchats", user.id), async (res) => {
+                if (res.exists()) {
+                    const userChatData = res.data();
+                    const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
+                    setSeen(userChatData.chats[chatIndex].isSeen)
+                }
+            })
+            return () => {
+                unSub()
             }
-        })
-        return () => {
-            unSub()
         }
-    }
+
 
     }, [chatId])
+    //checking call status
+    const [callerdetails, setcallerdetails] = useState("");
 
-console.log("seen status"+seen)
+    useEffect(() => {
+
+
+        const getcaller = async () => {
+            if (caller) {
+                const userdocRef = doc(db, "Users", caller);
+                const userdocSnap = await getDoc(userdocRef);
+                setcallerdetails(userdocSnap.data())
+            }
+
+        }
+        return () => {
+            getcaller()
+        }
+
+
+
+    }, [caller])
+
+    console.log("seen status" + seen)
     const handleEmoji = e => {
         settext(prev => prev + e.emoji);
         seteopen(false)
@@ -110,13 +133,13 @@ console.log("seen status"+seen)
             await userIds.forEach(async (id) => {
                 const userChatRef = doc(db, "Userchats", id);
                 const userChatSnap = await getDoc(userChatRef);
-                
+
                 if (userChatSnap.exists()) {
                     const userChatData = userChatSnap.data();
                     const chatIndex = userChatData.chats.findIndex(c => c.chatId == chatId)
                     userChatData.chats[chatIndex].lastMessage = text;
                     userChatData.chats[chatIndex].isSeen = id === CurrentUser.id ? true : false;
-                    userChatData.chats[chatIndex].istyping =  false;
+                    userChatData.chats[chatIndex].istyping = false;
 
                     userChatData.chats[chatIndex].updatedAt = Date.now();
                     await updateDoc(userChatRef, {
@@ -194,7 +217,7 @@ console.log("seen status"+seen)
         })
 
     }
-    const[userChatData,setuserChatData]=useState()
+    const [userChatData, setuserChatData] = useState()
     const handleinput = async (e) => {
         settext(e.target.value)
         const userChatRef = await doc(db, "Userchats", user.id);
@@ -205,8 +228,8 @@ console.log("seen status"+seen)
         })
         chatIndex = await userChatData.chats.findIndex(c => c.chatId == chatId)
         userChatData.chats[chatIndex].updatedAt = Date.now();
-        
-    
+
+
         const temp = e.target.value
         if (e.target.value == "" || e.target.value == null) {
             setTyping(false)
@@ -243,32 +266,86 @@ console.log("seen status"+seen)
 
         }, 4000)
 
-
-
     }
+
+    const [vc, setvc] = useState(false)
+    const [cmode, setcmode] = useState("")
+
+    const handlevc = (mode) => {
+        callmode ? setcmode(callmode) : setcmode(mode)
+        setvc(true)
+    }
+
+
+    if (vc || status == "accept") {
+        if (status == "accept") {
+            return (
+                callmode == "audio" ?
+                    <Vc setvc={setvc} video={false} /> : <Vc setvc={setvc} />
+    
+            )
+        } else return (
+            cmode == "audio" ?
+                <Vc setvc={setvc} video={false} /> : <Vc setvc={setvc} />
+
+        )
+    }
+    const handlepick = () => {
+        setcall(callid, caller, "accept", callmode)
+        setvc(true)
+    }
+    const handlereject = () => {
+        setcall(callid, caller, "reject", callmode)
+        setvc(true)
+    }
+
 
 
     const mql = window.matchMedia('(max-width: 600px)');
     let mobileView = mql.matches;
+    console.log("callid incaht" + callid)
     return (
 
         <div className='chat' style={mobileView ? { display: !details ? "flex" : "none" } : {}} >
             <div className="top">
-                <div className="user">
-                    <img className="close" src="./back.png" alt="" onClick={() => { setDetails(false); backchat() }} />
-                    <img src={user?.avatar || "./avatar.png"} alt="" onClick={() => setDetails(prev => !prev)} />
-                    <div className="texts">
-                        <span>{user?.username || "user illa"}</span>
-                        <p>{user?.bio || "lets gossip"}</p>
+                <div className='user-details'>
+
+                    <div className="user">
+                        <img className="close" src="./back.png" alt="" onClick={() => { setDetails(false); backchat() }} />
+                        <img src={user?.avatar || "./avatar.png"} alt="" onClick={() => setDetails(prev => !prev)} />
+                        <div className="texts">
+                            <span>{user?.username || "user illa"}</span>
+                            <p>{user?.bio || "lets gossip"}</p>
+                        </div>
+                    </div>
+                    <div className="icons">
+                        <img src="./phone.png" onClick={() => handlevc("audio")} alt="" />
+                        <img src="./video.png" onClick={() => handlevc("video")} alt="" />
                     </div>
                 </div>
-                <div className="icons">
-                    <img src="./phone.png" alt="" />
-                    <img src="./video.png" alt="" />
-                </div>
+                {caller != null && caller != CurrentUser.id && <div className="call-noti">
+                    <div className="card">
+                        <div className="name">
+                            <p className="p1">{callerdetails.username}</p>
+                            <p className="p2">Incoming Call</p>
+                        </div>
+                        <div className="caller">
+                            <span id="pick" className="callerBtn" onClick={() => handlepick()}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-telephone-fill" viewBox="0 0 16 16">
+                                    <path fillRule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"></path>
+                                </svg>
+                            </span>
+                            <span id="end" className="callerBtn" onClick={() => handlereject()}>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-telephone-fill" viewBox="0 0 16 16">
+                                    <path fillRule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"></path>
+                                </svg>
+                            </span></div>
+                    </div>
+                </div>}
+
             </div>
             <div className="center">
-                {chat?.map((message, index) => (
+                {chat?.message?.map((message, index) => (
                     <div className={message.senderId == CurrentUser.id ? "message own" : "message"} key={message?.createdAt}>
                         <div className="text">
                             {message.img && message.img.map((img, index) => (
@@ -340,6 +417,7 @@ console.log("seen status"+seen)
 
 
             </div>
+
         </div>
     )
 }
