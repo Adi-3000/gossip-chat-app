@@ -61,16 +61,15 @@ function Vc({ setvc, video }) {
     );
 }
 
-
-
-
-
 function Videos({ Mode, callId, setPage, setvc, video = true }) {
     const [roomId, setRoomId] = useState(callId);
     const { chatId, user, callid, setcall, caller, status, callmode } = useChatStore();
     const { CurrentUser } = useUserStore();
     let localStream, setupSources
     let pc = new RTCPeerConnection(servers);
+    const getmedia=async()=>{
+        
+    }
 
     const hangUp = async () => {
 
@@ -130,32 +129,28 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
 
     };
     useEffect(() => {
-
-        return () => {
-            console.log("called:"+callid)
-
-                setupSources(callid?"join":"create")
-        }
-    }, [chatId])
-
-    useEffect(() => {
-
         if (status == "reject") {
 
             hangUp()
         }
 
-    }, [status])
+        return () => {
+            console.log("called:"+callid)
+
+            
+                setupSources(callid?"join":"create")
+        }
+    }, [chatId,status])
+
+    
     const localRef = useRef();
     const remoteRef = useRef();
 
     setupSources = async (mode) => {
-
         localStream = await navigator.mediaDevices.getUserMedia({
             video: video,
             audio: true,
         });
-
         const remoteStream = new MediaStream();
 
         localStream.getTracks().forEach((track) => {
