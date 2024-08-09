@@ -39,13 +39,11 @@ function Vc({ setvc, video=true }) {
 
     console.log("vc funct called")
     useEffect(()=>{
-        return()=>{
-            if(!called){
+        if(!called){
 
-                console.log("useEffect 1 called")
-                console.log("called:"+callid)
-                setupSources(callid?"join":"create")
-            }
+            console.log("useEffect 1 called")
+            console.log("called:"+callid)
+            setupSources(callid?"join":"create")
         }
 
     })
