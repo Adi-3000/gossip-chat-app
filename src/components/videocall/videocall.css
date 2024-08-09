@@ -13,33 +13,44 @@
   }
 
   .remote {
-    width: 80%;
-    height: 80%;
+    position: relative;
+    top: 5%;
+    right: -2%;
+    width: 90%;
+    max-width: 90%;
+    height: 90%;
     border: 1px solid black;
     object-fit: cover;
   }
 
   .local {
     width: 30%;
+    max-width: 30%;
     height: 30%;
     position: relative;
-    top: -28%;
-    right: -23%;
+    top: -18%;
+    right: -30%;
+    border-radius: 10px;
   }
 
   .control {
+    position: relative;
+    top: -14%;
     background-color: rgb(30 39 57 / 47%);
     display: flex;
     width: 80%;
     gap: 15%;
-    height: 45px;
+    padding: 8px;
     border-radius: 15px;
     justify-content: space-around;
 
-    .mic,.camera,.end{
+    .mic,
+    .camera,
+    .end {
       display: flex;
       align-items: center;
       justify-content: center;
+
       .button {
         display: flex;
         justify-content: center;
@@ -50,10 +61,11 @@
         border: none;
         background-color: #FF2849;
       }
-      
+
       .button:hover {
         background-color: #e52441;
       }
+
       /*------ Settings ------*/
       .mute {
         --color: #a5a5b0;
@@ -103,6 +115,28 @@
 
   }
 
+}
+
+@media only screen and (max-width: 520px) {
+  .videos {
+    .remote {
+      right: -10px;
+      width: 90vw;
+      max-width: 90vw;
+      height: 95vh;
+      max-height: 95vh;
+    }
+
+    .local {
+      top: -13%;
+      right: -34%;
+    }
+
+    .control {
+      right: -3%
+    }
+
+  }
 }
 
 /* ------ Animation for mute ------ */

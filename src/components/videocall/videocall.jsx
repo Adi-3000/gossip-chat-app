@@ -40,7 +40,6 @@ function Vc({ setvc, video=true }) {
     console.log("vc funct called")
     useEffect(()=>{
         if(!called){
-
             console.log("useEffect 1 called")
             console.log("called:"+callid)
             setupSources(callid?"join":"create")
@@ -329,8 +328,8 @@ function Vc({ setvc, video=true }) {
         <div>
 
         <div className="videos">
-            <video ref={remoteRef} poster="./avatar.png" autoPlay playsInline className="remote" />
-            <video ref={localRef} poster="./avatar.png" autoPlay playsInline className="local" muted style={{ position: callmode == "audio" ? "static" : "relative" }} />
+            <video ref={remoteRef} poster="./avatar.png" autoPlay playsInline className="remote" style={{ top: callmode == "audio" ? "11%" : "5%" }} />
+            <video ref={localRef} poster="./avatar.png" autoPlay playsInline className="local" muted  />
             <div className="control">
 
                 <div className="camera">
