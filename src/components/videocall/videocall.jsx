@@ -66,16 +66,23 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
     let localStream, setupSources
     let pc = new RTCPeerConnection(servers);
 
-    
+    console.log("vc funct called")
+    useEffect(()=>{
+        console.log("useEffect 1 called")
+        return()=>{
+            console.log("called:"+callid)
+            setupSources(callid?"join":"create")
+        }
+
+    })
     useEffect(() => {
         return () => {
             if (status == "reject") {
             hangUp()
-        }
-            console.log("called:"+callid)
-            setupSources(callid?"join":"create")
+        }   
         }
     }, [chatId,status])
+   
 
     
     const localRef = useRef();
@@ -306,8 +313,6 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
                 }
             })
 
-            await deleteDoc(roomRef);
-            console.log("deleted call")
 
 
         }
