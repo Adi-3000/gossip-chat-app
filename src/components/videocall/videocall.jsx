@@ -28,7 +28,7 @@ const servers = {
             ],
         },
     ],
-    iceCandidatePoolSize: 10,
+    iceCandidatePoolSize: 10
 };
 
 function Vc({ setvc, video }) {
@@ -68,8 +68,8 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
 
     console.log("vc funct called")
     useEffect(()=>{
-        console.log("useEffect 1 called")
         return()=>{
+            console.log("useEffect 1 called")
             console.log("called:"+callid)
             setupSources(callid?"join":"create")
         }
@@ -81,8 +81,7 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
             hangUp()
         }   
         }
-    }, [chatId,status])
-   
+    }, [status])
 
     
     const localRef = useRef();
@@ -313,6 +312,8 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
                 }
             })
 
+            await deleteDoc(roomRef);
+            console.log("deleted call")
 
 
         }
