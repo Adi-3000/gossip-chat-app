@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import './videocall.css'
 
 import {
-    getFirestore,
     collection,
     doc,
     addDoc,
@@ -11,14 +10,11 @@ import {
     updateDoc,
     onSnapshot,
     deleteDoc,
-    query,
     getDocs,
 } from "firebase/firestore";
 import { db } from "../../lib/firebase";
 import { useChatStore } from "../../lib/chatstore";
 import { useUserStore } from "../../lib/Userstore";
-
-// Initialize WebRTC
 const servers = {
     iceServers: [
         {
@@ -31,50 +27,32 @@ const servers = {
     iceCandidatePoolSize: 10
 };
 
-function Vc({ setvc, video }) {
-    const [currentPage, setCurrentPage] = useState("create");
-    const { callid, caller, status, callmode } = useChatStore();
-    const [joinCode, setJoinCode] = useState(callid);
-    const { CurrentUser } = useUserStore();
-    const [cmode, setcmode] = useState(true);
 
-    useEffect(() => {
-        if (callid && caller != CurrentUser.id && status == "accept") {
-            setCurrentPage("join")
-            setJoinCode(callid)
-        }
-    })
-    console.log("current page:"+currentPage)
-
-    return (
-        <div className="app">
-            <Videos
-                mode={currentPage}
-                callId={joinCode}
-                setPage={setCurrentPage}
-                setvc={setvc}
-                video={video}
-            />
-        </div>
-    );
-}
-
-function Videos({ Mode, callId, setPage, setvc, video = true }) {
-    const [roomId, setRoomId] = useState(callId);
-    const { chatId, user, callid, setcall, caller, status, callmode } = useChatStore();
+function Vc({ setvc, video=true }) {
+    const { chatId, user, callid, setcall, status, callmode } = useChatStore();
+    const [roomId, setRoomId] = useState(callid);
+    const [called, setcalled] = useState(false);
+    
     const { CurrentUser } = useUserStore();
     let localStream, setupSources
     let pc = new RTCPeerConnection(servers);
 
     console.log("vc funct called")
     useEffect(()=>{
-        console.log("useEffect 1 called")
-        console.log("called:"+callid)
-        setupSources(callid?"join":"create")
+        return()=>{
+            if(!called){
+
+                console.log("useEffect 1 called")
+                console.log("called:"+callid)
+                setupSources(callid?"join":"create")
+            }
+        }
 
     })
     useEffect(() => {
         return () => {
+            console.log("useEffect 2 called")
+
             if (status == "reject") {
             hangUp()
         }   
@@ -86,6 +64,8 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
     const remoteRef = useRef();
 
     setupSources = async (mode) => {
+        
+        setcalled(true);
 
         localStream = await navigator.mediaDevices.getUserMedia({
             video: video,
@@ -201,7 +181,7 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
                 });
 
             } else if (mode === "join") {
-                const callDoc = doc(db, "calls", callId);
+                const callDoc = doc(db, "calls", callid);
                 const answerCandidates = collection(callDoc, "answerCandidates");
                 const offerCandidates = collection(callDoc, "offerCandidates");
 
@@ -267,7 +247,7 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
     const hangUp = async () => {
 
         pc.close();
-        console.log("hang up" + callId)
+        console.log("hang up" + callid)
 
         if (roomId) {
             let roomRef = doc(db, "calls", roomId);
@@ -348,6 +328,8 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
 
 
     return (
+        <div>
+
         <div className="videos">
             <video ref={remoteRef} poster="./avatar.png" autoPlay playsInline className="remote" />
             <video ref={localRef} poster="./avatar.png" autoPlay playsInline className="local" muted style={{ position: callmode == "audio" ? "static" : "relative" }} />
@@ -396,6 +378,7 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
             </div>
 
 
+        </div>
         </div>
     );
 }
