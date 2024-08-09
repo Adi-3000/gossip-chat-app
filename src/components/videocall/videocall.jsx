@@ -46,8 +46,6 @@ function Vc({ setvc, video }) {
     })
     console.log("current page:"+currentPage)
 
-
-
     return (
         <div className="app">
             <Videos
@@ -67,78 +65,15 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
     const { CurrentUser } = useUserStore();
     let localStream, setupSources
     let pc = new RTCPeerConnection(servers);
-    const getmedia=async()=>{
-        
-    }
 
-    const hangUp = async () => {
-
-        pc.close();
-        console.log("hang up" + callId)
-
-        if (roomId) {
-            let roomRef = doc(db, "calls", roomId);
-            const answerCandidates = collection(roomRef, "answerCandidates");
-            const offerCandidates = collection(roomRef, "offerCandidates");
-            const offerSnapshots = await getDocs(offerCandidates);
-            await offerSnapshots.forEach((doc) => {
-                deleteDoc(doc.ref);
-            });
-            console.log("deleted offer")
-            if (answerCandidates) {
-                const answerSnapshots = await getDocs(answerCandidates);
-                await answerSnapshots.forEach((doc) => {
-                    deleteDoc(doc.ref);
-                });
-                console.log("deleted answer")
-            }
-
-            const userIds = [CurrentUser.id, user.id]
-            await userIds.forEach(async (id) => {
-                const userChatRef = doc(db, "Userchats", id);
-                const userChatSnap = await getDoc(userChatRef);
-
-                if (userChatSnap.exists()) {
-                    const userChatData = await userChatSnap.data();
-                    const chatIndex = await userChatData.chats.findIndex(c => c.chatId == chatId)
-                    console.log("userchat for " + id + "with chat id " + chatId + " and chat index is " + chatIndex)
-                    console.log(userChatData.chats[chatIndex])
-                    const temp = userChatData.chats[chatIndex]
-                    temp.callid = null;
-                    temp.caller = null;
-                    temp.callmode = null;
-                    console.log("updated")
-                    console.log(temp)
-
-                    userChatData.chats[chatIndex].updatedAt = Date.now();
-                    await updateDoc(userChatRef, {
-                        chats: userChatData.chats,
-                    })
-                }
-            })
-
-            await deleteDoc(roomRef);
-            console.log("deleted call")
-
-
-        }
-        await setcall(null, null, null, null)
-        setvc(false)
-
-
-
-    };
+    
     useEffect(() => {
-        if (status == "reject") {
-
+        return () => {
+            if (status == "reject") {
             hangUp()
         }
-
-        return () => {
             console.log("called:"+callid)
-
-            
-                setupSources(callid?"join":"create")
+            setupSources(callid?"join":"create")
         }
     }, [chatId,status])
 
@@ -147,10 +82,12 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
     const remoteRef = useRef();
 
     setupSources = async (mode) => {
+
         localStream = await navigator.mediaDevices.getUserMedia({
             video: video,
             audio: true,
         });
+
         const remoteStream = new MediaStream();
 
         localStream.getTracks().forEach((track) => {
@@ -321,6 +258,63 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
         } catch (error) {
             console.log(error)
         }
+
+    };
+    const hangUp = async () => {
+
+        pc.close();
+        console.log("hang up" + callId)
+
+        if (roomId) {
+            let roomRef = doc(db, "calls", roomId);
+            const answerCandidates = collection(roomRef, "answerCandidates");
+            const offerCandidates = collection(roomRef, "offerCandidates");
+            const offerSnapshots = await getDocs(offerCandidates);
+            await offerSnapshots.forEach((doc) => {
+                deleteDoc(doc.ref);
+            });
+            console.log("deleted offer")
+            if (answerCandidates) {
+                const answerSnapshots = await getDocs(answerCandidates);
+                await answerSnapshots.forEach((doc) => {
+                    deleteDoc(doc.ref);
+                });
+                console.log("deleted answer")
+            }
+
+            const userIds = [CurrentUser.id, user.id]
+            await userIds.forEach(async (id) => {
+                const userChatRef = doc(db, "Userchats", id);
+                const userChatSnap = await getDoc(userChatRef);
+
+                if (userChatSnap.exists()) {
+                    const userChatData = await userChatSnap.data();
+                    const chatIndex = await userChatData.chats.findIndex(c => c.chatId == chatId)
+                    console.log("userchat for " + id + "with chat id " + chatId + " and chat index is " + chatIndex)
+                    console.log(userChatData.chats[chatIndex])
+                    const temp = userChatData.chats[chatIndex]
+                    temp.callid = null;
+                    temp.caller = null;
+                    temp.callmode = null;
+                    console.log("updated")
+                    console.log(temp)
+
+                    userChatData.chats[chatIndex].updatedAt = Date.now();
+                    await updateDoc(userChatRef, {
+                        chats: userChatData.chats,
+                    })
+                }
+            })
+
+            await deleteDoc(roomRef);
+            console.log("deleted call")
+
+
+        }
+        await setcall(null, null, null, null)
+        setvc(false)
+
+
 
     };
 
