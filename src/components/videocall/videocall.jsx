@@ -68,11 +68,9 @@ function Videos({ Mode, callId, setPage, setvc, video = true }) {
 
     console.log("vc funct called")
     useEffect(()=>{
-        return()=>{
-            console.log("useEffect 1 called")
-            console.log("called:"+callid)
-            setupSources(callid?"join":"create")
-        }
+        console.log("useEffect 1 called")
+        console.log("called:"+callid)
+        setupSources(callid?"join":"create")
 
     })
     useEffect(() => {
